@@ -1,3 +1,4 @@
+
 /**
  * A classe Client cria uma conexão com o servidor Server na porta padrão 1337.
  * Espera que o usuário insira uma string com o teclado referente a sua escolha:
@@ -66,29 +67,48 @@ class Client {
 		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 		do {
+			do {
 
-			if (entrada.equals("REGRAS")) {
-				System.out.println(Client.msgRegras);
+				if (entrada.equals("REGRAS")) {
+					System.out.println(Client.msgRegras);
+				}
+
+				// Solicita ao usuário a seleção de pedra, papel ou tesoura ...
+				System.out.println("Escreva qual sua escolha: Pedra || Papel || Tessoura");
+				System.out.print("-> digite \"regras\" para ver as regras do jogo:\n");
+				System.out.print("-> digite \"0\" para sair do jogo: ");
+				entrada = inFromUser.readLine();
+				entrada = entrada.toUpperCase();
+
+			} while (!entrada.equals("PEDRA") && !entrada.equals("PAPEL") && !entrada.equals("TESOURA")
+					&& !entrada.equals("0"));
+
+			outToServer.writeBytes(entrada + "\n");
+			if (entrada.equals("0")) {
+				System.out.println("\nVocê optou por (" + entrada + ") e saiu do jogo, volte mais vezes! o/");
+			} else {
+				// Transmite a entrada para o servidor e fornece o feedback adequado do jogador
+				System.out.println(
+						"\nSua jogada (" + entrada + ") foi salva com sucesso no servidor. \nAguarde o resultado ...");
 			}
+			
+			// Pega a resposta do servidor e imprime ao jogador
+			do {
+				resposta = inFromServer.readLine();
+			} while(!inFromServer.readLine().equals("VOCÊ GANHOU!") || !inFromServer.readLine().equals("VOCÊ PERDEU!")
+					|| !inFromServer.readLine().equals("EMPATE!") || !inFromServer.readLine().equals("VOCÊ SAIU DO JOGO.") 
+					|| !inFromServer.readLine().equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO."));
 
-			// Solicita ao usuário a seleção de pedra, papel ou tesoura ...
-			System.out.println("Comece o jogo escrevendo qual sua escolha: \n Pedra || Papel || Tessoura");
-			System.out.print("ou digite \"regras\" para ver as regras do jogo: ");
-			entrada = inFromUser.readLine();
-			entrada = entrada.toUpperCase();
+			System.out.println("Resultado: " + resposta);				
 
-		} while (!entrada.equals("PEDRA") && !entrada.equals("PAPEL") && !entrada.equals("TESOURA"));
-
-		// Transmite a entrada para o servidor e fornece o feedback adequado do jogador
-		outToServer.writeBytes(entrada + "\n");
-		System.out.println("\nSua jogada (" + entrada + ") foi salva com sucesso no servidor. \nAguarde o resultado ...");
-
-		// Pega a resposta do servidor e imprime ao jogador
-		resposta = inFromServer.readLine();
-		System.out.println("Resultado: " + resposta);
-
-		// Fecha o Socket
-		clientSocket.close();
-
+			if (resposta.equals("VOCÊ SAIU DO JOGO.")
+					|| resposta.equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO.")) {
+				// Fecha o Socket
+				clientSocket.close();
+			}
+		} while (!resposta.equals("VOCÊ SAIU DO JOGO.")
+				|| !resposta.equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO."));
+		
+		
 	}
 }
