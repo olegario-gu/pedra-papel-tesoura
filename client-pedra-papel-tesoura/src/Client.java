@@ -14,8 +14,12 @@
  * 
  */
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.Random;
+import java.util.Scanner;
 
 class Client {
 
@@ -45,7 +49,9 @@ class Client {
 	 * 
 	 * @var string
 	 */
-	private static String msgBoasVindas = "--- Bem-Vindo ao Jokenpo V. " + numVersao + " --- \n";
+	private static String msgBoasVindas = "--- Bem-Vindo ao Jokenpo V. " + numVersao + " --- \n"
+			+ "\nDigite a opção de jogo que deseja: " + "\n1-> Para Single Player vs PC "
+			+ "\n2-> Para Multiplayer Online";
 
 	/**
 	 * Mensagem de regras do jogo
@@ -56,59 +62,198 @@ class Client {
 
 	public static void main(String args[]) throws Exception {
 
-		String entrada = "";
-		String resposta;
-
 		System.out.println(Client.msgBoasVindas);
 
-		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
-		Socket clientSocket = new Socket(Client.host, Client.port);
-		DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-		BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		int option;
+
+		Scanner scan = new Scanner(System.in);
+		Scanner scanS = new Scanner(System.in);
+
+		option = scan.nextInt();
+		String entrada = "";
+		String resposta;
+		int vits = 0, emps = 0, ders = 0;
 
 		do {
-			do {
+			switch (option) {
+			case 1:
+				String entradaCpu = "";
 
-				if (entrada.equals("REGRAS")) {
-					System.out.println(Client.msgRegras);
-				}
+				do {
+					do {
 
-				// Solicita ao usuário a seleção de pedra, papel ou tesoura ...
-				System.out.println("Escreva qual sua escolha: Pedra || Papel || Tessoura");
-				System.out.print("-> digite \"regras\" para ver as regras do jogo:\n");
-				System.out.print("-> digite \"0\" para sair do jogo: ");
-				entrada = inFromUser.readLine();
-				entrada = entrada.toUpperCase();
+						if (entrada.equals("REGRAS")) {
+							System.out.println(Client.msgRegras);
+						}
 
-			} while (!entrada.equals("PEDRA") && !entrada.equals("PAPEL") && !entrada.equals("TESOURA")
-					&& !entrada.equals("0"));
+						// Solicita ao usuário a seleção de pedra, papel ou tesoura ...
+						System.out.println("Escreva qual sua escolha: Pedra || Papel || Tesoura");
+						System.out.print("-> digite \"regras\" para ver as regras do jogo:\n");
+						System.out.print("-> digite \"0\" para sair do jogo: ");
+						entrada = scanS.nextLine();
+						entrada = entrada.toUpperCase();
 
-			outToServer.writeBytes(entrada + "\n");
-			if (entrada.equals("0")) {
+					} while (!entrada.equals("PEDRA") && !entrada.equals("PAPEL") && !entrada.equals("TESOURA")
+							&& !entrada.equals("0"));
+					
+					Random r = new Random();
+
+					int cpuPlay = r.nextInt(3) + 1;
+					if (cpuPlay == 1) {
+						entradaCpu = "PEDRA";
+					} else if (cpuPlay == 2) {
+						entradaCpu = "PAPEL";
+					} else if (cpuPlay == 3) {
+						entradaCpu = "TESOURA";
+					}
+					
+					
+					resposta = resultado(entrada, entradaCpu);
+					System.out.println("A CPU escolheu:" + entradaCpu);
+					System.out.println("Resultado:" + resposta);
+
+					if (resposta.equals("VOCÊ PERDEU!")) {
+						ders++;
+					} else if (resposta.equals("VOCÊ GANHOU!")) {
+						vits++;
+					} else if (resposta.equals("EMPATE!")) {
+						emps++;
+					}
+					System.out.println("-----------------------     |PLACAR|     -----------------------");
+					System.out.println("Vitórias: " + vits + " || Empates: " + emps + " || Derrotas: " + ders);
+
+				} while (!entrada.equals("0"));
+				
 				System.out.println("\nVocê optou por (" + entrada + ") e saiu do jogo, volte mais vezes! o/");
-			} else {
-				// Transmite a entrada para o servidor e fornece o feedback adequado do jogador
-				System.out.println(
-						"\nSua jogada (" + entrada + ") foi salva com sucesso no servidor. \nAguarde o resultado ...");
-			}
-			
-			// Pega a resposta do servidor e imprime ao jogador
-			do {
-				resposta = inFromServer.readLine();
-			} while(!inFromServer.readLine().equals("VOCÊ GANHOU!") || !inFromServer.readLine().equals("VOCÊ PERDEU!")
-					|| !inFromServer.readLine().equals("EMPATE!") || !inFromServer.readLine().equals("VOCÊ SAIU DO JOGO.") 
-					|| !inFromServer.readLine().equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO."));
+				option = 0;
+				
+				break;
+			case 2:
 
-			System.out.println("Resultado: " + resposta);				
+				boolean loop = true;
 
-			if (resposta.equals("VOCÊ SAIU DO JOGO.")
-					|| resposta.equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO.")) {
-				// Fecha o Socket
-				clientSocket.close();
+				do {
+					BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+					Socket clientSocket = new Socket(Client.host, Client.port);
+					DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+					BufferedReader inFromServer = new BufferedReader(
+							new InputStreamReader(clientSocket.getInputStream()));
+
+					do {
+
+						if (entrada.equals("REGRAS")) {
+							System.out.println(Client.msgRegras);
+						}
+
+						// Solicita ao usuário a seleção de pedra, papel ou tesoura ...
+						System.out.println("Escreva qual sua escolha: Pedra || Papel || Tesoura");
+						System.out.print("-> digite \"regras\" para ver as regras do jogo:\n");
+						System.out.print("-> digite \"0\" para sair do jogo: ");
+						entrada = inFromUser.readLine();
+						entrada = entrada.toUpperCase();
+
+					} while (!entrada.equals("PEDRA") && !entrada.equals("PAPEL") && !entrada.equals("TESOURA")
+							&& !entrada.equals("0"));
+
+					outToServer.writeBytes(entrada + "\n");
+					if (entrada.equals("0")) {
+						System.out.println("\nVocê optou por (" + entrada + ") e saiu do jogo, volte mais vezes! o/");
+					} else {
+						// Transmite a entrada para o servidor e fornece o feedback adequado do jogador
+						System.out.println("\nSua jogada (" + entrada
+								+ ") foi salva com sucesso no servidor. \nAguarde o resultado ...");
+					}
+
+					// Pega a resposta do servidor e imprime ao jogador
+					resposta = inFromServer.readLine();
+					System.out.println("Resultado: " + resposta + "\n");
+
+					if (resposta.equals("VOCÊ PERDEU!")) {
+						ders++;
+					} else if (resposta.equals("VOCÊ GANHOU!")) {
+						vits++;
+					} else if (resposta.equals("EMPATE!")) {
+						emps++;
+					}
+					System.out.println("-----------------------     |PLACAR|     -----------------------");
+					System.out.println("Vitórias: " + vits + " || Empates: " + emps + " || Derrotas: " + ders);
+
+					if (resposta.equals("VOCÊ SAIU DO JOGO.")
+							|| resposta.equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO.")) {
+						loop = false;
+					}
+
+					clientSocket.close();
+
+				} while (loop);
+				option = 0;
+
+				break;
+			default:
+				System.out.println("Opção Inválida");
+				break;
 			}
-		} while (!resposta.equals("VOCÊ SAIU DO JOGO.")
-				|| !resposta.equals("O OUTRO JOGADOR DECIDIU PARAR, FIM DE JOGO."));
-		
-		
+		} while (option != 0);
+
+	}
+
+	public static String resultado(String j1, String j2) {
+
+		String inputClient_1 = j1;
+		String inputClient_2 = j2;
+		String resClient_1 = "";
+
+		/**
+		 * Se os inputs de C1 e C2 forem iguais, o servidor envia de volta para ambos os
+		 * clientes a string "Empate!".
+		 */
+		if (inputClient_1.equals(inputClient_2)) {
+			resClient_1 = "Empate!";
+		}
+		/**
+		 * Se o servidor receber 'PEDRA' do C1 e 'TESOURA' do C2, enviamos a string
+		 * "Você Ganhou!" ao C1 e "Você Perdeu!" ao C2.
+		 */
+		else if (inputClient_1.equals("PEDRA") && inputClient_2.equals("TESOURA")) {
+			resClient_1 = "Você Ganhou!";
+
+		}
+		/**
+		 * Se o servidor receber 'TESOURA' do C1 e 'PEDRA' do C2, enviamos a string
+		 * "Você Ganhou!" ao C2 e "Você Perdeu!" ao C1.
+		 */
+		else if (inputClient_1.equals("TESOURA") && inputClient_2.equals("PEDRA")) {
+			resClient_1 = "Você Perdeu!";
+		}
+		/**
+		 * Se o servidor receber 'PEDRA' do C1 e 'PAPEL' do C2, enviamos a string "Você
+		 * Ganhou!" ao C2 e "Você Perdeu!" ao C1.
+		 */
+		else if (inputClient_1.equals("PEDRA") && inputClient_2.equals("PAPEL")) {
+			resClient_1 = "Você Perdeu!";
+		}
+		/**
+		 * Se o servidor receber 'PAPEL' do C1 e 'PEDRA' do C2, enviamos a string "Você
+		 * Ganhou!" ao C1 e "Você Perdeu!" ao C2.
+		 */
+		else if (inputClient_1.equals("PAPEL") && inputClient_2.equals("PEDRA")) {
+			resClient_1 = "Você Ganhou!";
+		}
+		/**
+		 * Se o servidor receber 'TESOURA' do C1 e 'PAPEL' do C2, enviamos a string
+		 * "Você Ganhou!" ao C1 e "Você Perdeu!" ao C2.
+		 */
+		else if (inputClient_1.equals("TESOURA") && inputClient_2.equals("PAPEL")) {
+			resClient_1 = "Você Ganhou!";
+		}
+		/**
+		 * Se o servidor receber 'PAPEL' do C1 e 'TESOURA' do C2, enviamos a string
+		 * "Você Ganhou!" ao C2 e "Você Perdeu!" ao C1.
+		 */
+		else if (inputClient_1.equals("PAPEL") && inputClient_2.equals("TESOURA")) {
+			resClient_1 = "Você Perdeu!";
+		}
+
+		return resClient_1.toUpperCase();
 	}
 }

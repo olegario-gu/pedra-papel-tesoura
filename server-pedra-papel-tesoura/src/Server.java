@@ -101,25 +101,25 @@ public class Server {
 
 		while (!welcomeSocket.isClosed()) {
 
-			// Jogador 1
-			Socket client_1 = welcomeSocket.accept();
-			if (client_1.isConnected()) {
-				System.out.println("\nJogador 1 (" + (client_1.getLocalAddress().toString()).substring(1) + ":"
-						+ client_1.getLocalPort() + ") entrou no servidor ... esperando o segundo jogador ...");
-			}
-			DataOutputStream outClient_1 = new DataOutputStream(client_1.getOutputStream());
-			BufferedReader inClient_1 = new BufferedReader(new InputStreamReader(client_1.getInputStream()));
-
-			// Jogador 2
-			Socket client_2 = welcomeSocket.accept();
-			if (client_2.isConnected()) {
-				System.out.println("Jogador 2 (" + (client_2.getLocalAddress().toString()).substring(1) + ":"
-						+ client_1.getLocalPort() + ") entrou no servidor ... Vamos começar!");
-			}
-			DataOutputStream outClient_2 = new DataOutputStream(client_2.getOutputStream());
-			BufferedReader inClient_2 = new BufferedReader(new InputStreamReader(client_2.getInputStream()));
-
 			do {
+				// Jogador 1
+				Socket client_1 = welcomeSocket.accept();
+				if (client_1.isConnected()) {
+					System.out.println("\nJogador 1 (" + (client_1.getLocalAddress().toString()).substring(1) + ":"
+							+ client_1.getLocalPort() + ") entrou no servidor ... esperando o segundo jogador ...");
+				}
+				DataOutputStream outClient_1 = new DataOutputStream(client_1.getOutputStream());
+				BufferedReader inClient_1 = new BufferedReader(new InputStreamReader(client_1.getInputStream()));
+
+				// Jogador 2
+				Socket client_2 = welcomeSocket.accept();
+				if (client_2.isConnected()) {
+					System.out.println("Jogador 2 (" + (client_2.getLocalAddress().toString()).substring(1) + ":"
+							+ client_1.getLocalPort() + ") entrou no servidor ... Vamos começar!");
+				}
+				DataOutputStream outClient_2 = new DataOutputStream(client_2.getOutputStream());
+				BufferedReader inClient_2 = new BufferedReader(new InputStreamReader(client_2.getInputStream()));
+
 				// Recebe o input dos dois jogadores
 				inputClient_1 = inClient_1.readLine();
 				inputClient_2 = inClient_2.readLine();
@@ -131,7 +131,6 @@ public class Server {
 				if (inputClient_1.equals("0")) {
 					resClient_1 = "Você saiu do Jogo.";
 					resClient_2 = "O outro jogador decidiu parar, fim de jogo.";
-					System.out.println("Jogador 1 saiu do jogo.");
 				}
 				/**
 				 * Se o input de C2 for 0, o servidor envia as respostas de fim de jogo para
@@ -140,7 +139,6 @@ public class Server {
 				else if (inputClient_2.equals("0")) {
 					resClient_1 = "O outro jogador decidiu parar, fim de jogo.";
 					resClient_2 = "Você saiu do Jogo.";
-					System.out.println("Jogador 2 saiu do jogo.");
 				}
 				/**
 				 * Se os inputs de C1 e C2 forem iguais, o servidor envia de volta para ambos os
@@ -149,7 +147,6 @@ public class Server {
 				else if (inputClient_1.equals(inputClient_2)) {
 					resClient_1 = "Empate!";
 					resClient_2 = "Empate!";
-					System.out.println("Deu empate!");
 				}
 				/**
 				 * Se o servidor receber 'PEDRA' do C1 e 'TESOURA' do C2, enviamos a string
@@ -158,7 +155,6 @@ public class Server {
 				else if (inputClient_1.equals("PEDRA") && inputClient_2.equals("TESOURA")) {
 					resClient_1 = "Você Ganhou!";
 					resClient_2 = "Você Perdeu!";
-					System.out.println("Jogador 1 ganhou!");
 
 				}
 				/**
@@ -168,7 +164,6 @@ public class Server {
 				else if (inputClient_1.equals("TESOURA") && inputClient_2.equals("PEDRA")) {
 					resClient_1 = "Você Perdeu!";
 					resClient_2 = "Você Ganhou!";
-					System.out.println("Jogador 2 ganhou!");
 				}
 				/**
 				 * Se o servidor receber 'PEDRA' do C1 e 'PAPEL' do C2, enviamos a string "Você
@@ -177,7 +172,6 @@ public class Server {
 				else if (inputClient_1.equals("PEDRA") && inputClient_2.equals("PAPEL")) {
 					resClient_1 = "Você Perdeu!";
 					resClient_2 = "Você Ganhou!";
-					System.out.println("Jogador 2 ganhou!");
 				}
 				/**
 				 * Se o servidor receber 'PAPEL' do C1 e 'PEDRA' do C2, enviamos a string "Você
@@ -186,7 +180,6 @@ public class Server {
 				else if (inputClient_1.equals("PAPEL") && inputClient_2.equals("PEDRA")) {
 					resClient_1 = "Você Ganhou!";
 					resClient_2 = "Você Perdeu!";
-					System.out.println("Jogador 1 ganhou!");
 				}
 				/**
 				 * Se o servidor receber 'TESOURA' do C1 e 'PAPEL' do C2, enviamos a string
@@ -195,7 +188,6 @@ public class Server {
 				else if (inputClient_1.equals("TESOURA") && inputClient_2.equals("PAPEL")) {
 					resClient_1 = "Você Ganhou!";
 					resClient_2 = "Você Perdeu!";
-					System.out.println("Jogador 1 ganhou!");
 				}
 				/**
 				 * Se o servidor receber 'PAPEL' do C1 e 'TESOURA' do C2, enviamos a string
@@ -204,7 +196,6 @@ public class Server {
 				else if (inputClient_1.equals("PAPEL") && inputClient_2.equals("TESOURA")) {
 					resClient_1 = "Você Perdeu!";
 					resClient_2 = "Você Ganhou!";
-					System.out.println("Jogador 2 ganhou!");
 				}
 
 				System.out.println(resClient_1.toUpperCase());
@@ -212,12 +203,12 @@ public class Server {
 				// Envia as respostas em maiusculo e fecha os sockets
 				outClient_1.writeBytes(resClient_1.toUpperCase());
 				outClient_2.writeBytes(resClient_2.toUpperCase());
-			
-			// Avalia se algum jogador saiu do jogo
-			} while (!inputClient_1.equals("0") || !inputClient_2.equals("0"));
 
-			client_1.close();
-			client_2.close();
+				client_2.close();
+				client_1.close();
+
+				// Avalia se algum jogador saiu do jogo
+			} while (!inputClient_1.equals("0") || !inputClient_2.equals("0"));
 
 			System.out.println("\nEsperando por novos jogadores ...\n");
 
