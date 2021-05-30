@@ -1,4 +1,3 @@
-
 /**
  * A classe Client cria uma conexão com o servidor Server na porta padrão 1337.
  * Espera que o usuário insira uma string com o teclado referente a sua escolha:
@@ -64,17 +63,17 @@ class Client {
 
 		System.out.println(Client.msgBoasVindas);
 
+		String entrada = "";
+		String resposta;
 		int option;
+		int vits = 0, emps = 0, ders = 0;
 
 		Scanner scan = new Scanner(System.in);
 		Scanner scanS = new Scanner(System.in);
 
-		option = scan.nextInt();
-		String entrada = "";
-		String resposta;
-		int vits = 0, emps = 0, ders = 0;
-
 		do {
+		option = scan.nextInt();
+
 			switch (option) {
 			case 1:
 				String entradaCpu = "";
@@ -191,6 +190,7 @@ class Client {
 				break;
 			default:
 				System.out.println("Opção Inválida");
+				System.out.println("Escolha uma opção válida:");
 				break;
 			}
 		} while (option != 0);
